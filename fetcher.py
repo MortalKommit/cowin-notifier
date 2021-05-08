@@ -67,9 +67,9 @@ class AppFetcher:
             sessions.append({"center_name": match.context.context.value[
                             "name"], "available_capacity": match.value[
                                 "available_capacity"],
-                             "age_range": match.value["min_age_limit"],
-                             "price": match.context.context.value["fee_type"],
-                             "vaccine": match.value["vaccine"]})
+                "age_range": match.value["min_age_limit"],
+                "price": match.context.context.value["fee_type"],
+                "vaccine": match.value["vaccine"]})
 
         return sessions
 
@@ -83,8 +83,8 @@ class AppFetcher:
         self.log_filename = f"logs/infolog_{date_format}.log"
         os.makedirs(os.path.dirname(self.log_filename), exist_ok=True)
         # Root logger config
-        logging.basicConfig(filename=self.log_filename, encoding="utf-8",
-                            level=logging.INFO, filemode='a')
+        logging.basicConfig(filename=self.log_filename, level=logging.INFO,
+                            filemode='a')
 
         # define an error Handler which writes error messages to error log file
         error_file = logging.FileHandler(f"logs/errorlog_{date_format}.log",
