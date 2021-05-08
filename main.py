@@ -9,7 +9,8 @@ config = configparser.ConfigParser(allow_no_value=True)
 
 
 def read_config():
-    """ Reads from config.ini and determines search parameters
+    """ 
+    Reads from config.ini and determines search parameters
 
     Returns:
         AppFetcher instance: object that has request parameters initialized
@@ -38,13 +39,12 @@ def open_url(page_url="https://selfregistration.cowin.gov.in/"):
         print('Failed to open URL. Unsupported variable type.')
 
 
-async def fetch_sessions(app, wait=30):
+async def fetch_sessions(app, wait):
     """
     Fetches appointment sessions,  if available every <wait> seconds
 
     Args:
-        wait (int, optional): Wait period between session fetch.
-        Defaults to 30.
+        wait (int): Wait period between session fetch, in seconds.
 
     Returns:
         msg str: Notification message, top 3 sessions by available capacity
@@ -66,11 +66,13 @@ async def fetch_sessions(app, wait=30):
 
 
 async def notify(msg):
-    """ Creates a short-lived desktop notification
+    """ 
+    Creates a short-lived desktop notification
 
     Args:
         msg (str): Message string
     """
+
     toaster = ToastNotifier()
     toaster.show_toast(
         "Appointment available!",  # title
@@ -85,7 +87,15 @@ async def notify(msg):
         await asyncio.sleep(0.1)
 
 
-async def periodic_fetch(wait=30):
+async def periodic_fetch(wait=15):
+    """
+    Runs notifier and session fetcher, asynchronously
+
+    Args:
+
+        wait (int, optional): Wait period between requests, in seconds.
+                              Defaults to 15.
+    """
 
     # Read config from config.ini
     app = read_config()

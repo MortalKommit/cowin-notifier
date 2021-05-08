@@ -74,11 +74,13 @@ class AppFetcher:
         return sessions
 
     def _set_loggers(self):
-        """ Configures logging for object
+        """
+        Configures logging for object
 
         Returns:
             None
         """
+
         date_format = datetime.now().strftime("%Y-%m-%d")
         self.log_filename = f"logs/infolog_{date_format}.log"
         os.makedirs(os.path.dirname(self.log_filename), exist_ok=True)
@@ -97,13 +99,15 @@ class AppFetcher:
         self.info_logger = logging.getLogger('info_log')
 
     def get_sessions(self):
-        """ Gets a list of appointments available and returns them by
-            center
+        """ 
+        Gets a list of appointments available and returns them by
+        center
 
         Returns:
             list: list of appointments, filtered and sorted by capacity
             None: if none are available
         """
+
         sessions = []
         params = []
         if isinstance(self.search_term, list):
