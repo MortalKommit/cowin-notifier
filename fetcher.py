@@ -105,9 +105,10 @@ class AppFetcher:
             None: if none are available
         """
         sessions = []
+        params = []
         if isinstance(self.search_term, list):
             for pin in self.search_term:
-                params = {"pincode": pin, "date": self.date}
+                params.append({"pincode": pin, "date": self.date})
         else:
             params = [{"district_id": self.search_term, "date": self.date}]
 

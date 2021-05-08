@@ -17,7 +17,8 @@ def read_config():
     config.read("config.ini")
     search_term = None
     if config["SEARCH TERM"].get("pin codes"):
-        search_term = config["SEARCH TERM"]["pin codes"].split(",")
+        search_term = [pin.strip() for pin in
+                       config["SEARCH TERM"]["pin codes"].split(",")]
     elif config["SEARCH TERM"].get("district"):
         search_term = config["SEARCH TERM"]["district"]
 
