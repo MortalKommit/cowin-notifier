@@ -1,6 +1,9 @@
-from plyer import notification
+from win10toast_click import ToastNotifier
 import fetcher
 import configparser
+import webbrowser
+import asyncio
+
 
 config = configparser.ConfigParser(allow_no_value=True)
 
@@ -26,22 +29,69 @@ def read_config():
                               age_filter=age_group)
 
 
-def fetch_sessions(wait=30):
+def open_url(page_url="https://selfregistration.cowin.gov.in/"):
+    try:
+        webbrowser.open_new(page_url)
+        print("Opening URL...")
+    except webbrowser.Error:
+        print('Failed to open URL. Unsupported variable type.')
+
+
+async def fetch_sessions(app, wait=30):
+    """
+    Fetches appointment sessions,  if available every <wait> seconds
+
+    Args:
+        wait (int, optional): Wait period between session fetch.
+        Defaults to 30.
+
+    Returns:
+        msg str: Notification message, top 3 sessions by available capacity
+    """
+
+    msg = ""
     sessions = app.get_sessions()
 
     if sessions is not None:
-        msg = ""
         for session in sessions[0:3]:
             msg += " ".join((session["center_name"],
-                            f" capacity: {session['available_capacity']}",
-                             f"age: {session['age_range']}+")) + '\n'
+                            f" no.s: {session['available_capacity']}",
+                             f"age: {session['age_range']}+",
+                             f"{session['vaccine']}",
+                             f"{session['price']}")) + "\n"
+    await asyncio.sleep(wait)
 
-        notification.notify(
-            title="Vaccine Appointment Available",
-            message=f"{msg}",
-            timeout=15
-        )
+    return msg
 
 
-app = read_config()
-fetch_sessions()
+async def notify(msg):
+    """ Creates a short-lived desktop notification
+
+    Args:
+        msg (str): Message string
+    """
+    toaster = ToastNotifier()
+    toaster.show_toast(
+        "Appointment available!",  # title
+        f"{msg} >>",  # message
+        icon_path=None,
+        duration=8,  # None = leave notification in Notification Center
+        threaded=True,  # True = run other code in parallel
+        callback_on_click=open_url
+    )
+
+    while toaster.notification_active():
+        await asyncio.sleep(0.1)
+
+
+async def periodic_fetch(wait=30):
+
+    # Read config from config.ini
+    app = read_config()
+    while True:
+        msg = await fetch_sessions(app, wait)
+        if msg:
+            await notify(msg)
+
+
+asyncio.run(periodic_fetch())

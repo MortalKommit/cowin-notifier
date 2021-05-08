@@ -104,10 +104,9 @@ class AppFetcher:
             list: list of appointments, filtered and sorted by capacity
             None: if none are available
         """
-
+        sessions = []
         if isinstance(self.search_term, list):
             for pin in self.search_term:
-                # params = {"pincode": pin, "date": self.date}
                 params = {"pincode": pin, "date": self.date}
         else:
             params = [{"district_id": self.search_term, "date": self.date}]
@@ -143,7 +142,7 @@ class AppFetcher:
                         jsonpath_expr = parse("$.centers[*].sessions \
                         [?(@.available_capacity > 0)]")
 
-                    sessions = self._parse_sessions(resp, jsonpath_expr)
+                    sessions.extend(self._parse_sessions(resp, jsonpath_expr))
 
             except requests.HTTPError:
                 logging.error(" ".join(
@@ -157,18 +156,18 @@ class AppFetcher:
                     (f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} :",
                      f"{e}")))
 
-            if len(sessions) > 0:
-                session_list = sorted(sessions, key=lambda k:
-                                      k["available_capacity"],
-                                      reverse=True)
+        if len(sessions) > 0:
+            session_list = sorted(sessions, key=lambda k:
+                                  k["available_capacity"],
+                                  reverse=True)
 
-                self.info_logger.info(" ".join(
-                    (f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} :",
-                     f"{r.request.url}",
-                     "Appointments available! ",
-                     f"[{r.status_code}]")))
+            self.info_logger.info(" ".join(
+                (f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} :",
+                 f"{r.request.url}",
+                 "Appointments available! ",
+                 f"[{r.status_code}]")))
 
-                return session_list
+            return session_list
         return
 
 
