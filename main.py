@@ -9,7 +9,7 @@ config = configparser.ConfigParser(allow_no_value=True)
 
 
 def read_config():
-    """ 
+    """
     Reads from config.ini and determines search parameters
 
     Returns:
@@ -56,7 +56,8 @@ async def fetch_sessions(app, wait):
     if sessions is not None:
         for session in sessions[0:3]:
             msg += " ".join((session["center_name"],
-                            f" no.s: {session['available_capacity']}",
+                            f"{session['pincode']}",
+                             f" no.s: {session['available_capacity']}",
                              f"age: {session['age_range']}+",
                              f"{session['vaccine']}",
                              f"{session['price']}")) + "\n"
@@ -66,7 +67,7 @@ async def fetch_sessions(app, wait):
 
 
 async def notify(msg):
-    """ 
+    """
     Creates a short-lived desktop notification
 
     Args:
@@ -105,4 +106,4 @@ async def periodic_fetch(wait=15):
             await notify(msg)
 
 
-asyncio.run(periodic_fetch())
+asyncio.run(periodic_fetch(wait=10))

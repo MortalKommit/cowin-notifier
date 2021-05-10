@@ -57,19 +57,30 @@ class AppFetcher:
             browser={"browser": "firefox",
                      "platform": "windows"})
 
-    def _parse_sessions(self, resp, jsonpath_expr):
+    def _parse_sessions(self, resp, jsonpath_expr, req_url, req_status):
         sessions = []
 
         # 1 center -> n sessions (2 level context)
 
         for match in jsonpath_expr.find(resp):
 
-            sessions.append({"center_name": match.context.context.value[
-                            "name"], "available_capacity": match.value[
-                                "available_capacity"],
+            sessions.append({
+                "center_name": match.context.context.value["name"],
+                "pincode": match.context.context.value["pincode"],
+                "available_capacity": match.value["available_capacity"],
                 "age_range": match.value["min_age_limit"],
                 "price": match.context.context.value["fee_type"],
                 "vaccine": match.value["vaccine"]})
+
+            # Log similar info to file
+            self.info_logger.info(" ".join(
+                (f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} :",
+                 f"{req_url}",
+                 "Appointments available!",
+                 f"{match.context.context.value['name']}:",
+                 f"{match.context.context.value['pincode']}",
+                 f"{match.value['available_capacity']}",
+                 f"[{req_status}]")))
 
         return sessions
 
@@ -99,7 +110,7 @@ class AppFetcher:
         self.info_logger = logging.getLogger('info_log')
 
     def get_sessions(self):
-        """ 
+        """
         Gets a list of appointments available and returns them by
         center
 
@@ -147,7 +158,8 @@ class AppFetcher:
                         jsonpath_expr = parse("$.centers[*].sessions \
                         [?(@.available_capacity > 0)]")
 
-                    sessions.extend(self._parse_sessions(resp, jsonpath_expr))
+                    sessions.extend(self._parse_sessions(
+                        resp, jsonpath_expr, r.request.url, r.status_code))
 
             except requests.HTTPError:
                 logging.error(" ".join(
@@ -165,12 +177,6 @@ class AppFetcher:
             session_list = sorted(sessions, key=lambda k:
                                   k["available_capacity"],
                                   reverse=True)
-
-            self.info_logger.info(" ".join(
-                (f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} :",
-                 f"{r.request.url}",
-                 "Appointments available! ",
-                 f"[{r.status_code}]")))
 
             return session_list
         return
